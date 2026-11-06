@@ -41,6 +41,15 @@
     .bottom h2 { margin:0 0 9px; font-size:1.1rem; }
     pre { overflow:auto; padding:12px; background:#050c19; color:#b9f1d2; border-radius:12px; font-size:.82rem; line-height:1.48; }
     video { background:black; width:100%; max-height:260px; object-fit:contain; border-radius:10px; display:none; margin-top:12px; }
+    .editor-panel { margin-top:18px; }
+    .editor-head { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+    .editor-head h2 { margin:0 0 8px; }
+    .editor-control { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:12px 0; }
+    select { background:#172944; color:var(--text); border:1px solid #597494; border-radius:10px; padding:10px 13px; font:inherit; max-width:100%; }
+    textarea { width:100%; min-height:180px; resize:vertical; background:#060f20; color:#aef2bf; border:1px solid #426384; border-radius:12px; padding:15px; font:500 1rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; tab-size:4; }
+    textarea:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+    #consoleOutput { min-height:100px; max-height:290px; white-space:pre-wrap; overflow-wrap:anywhere; color:#d9edff; }
+    .editor-panel .note { margin:8px 0; }
     .footnote { color:var(--muted); font-size:.82rem; line-height:1.5; margin-top:18px; }
     @media(max-width:720px) { .main-grid,.bottom { grid-template-columns:1fr; } .side { text-align:center; } .game-footer { align-items:flex-start; } }
   </style>
@@ -97,6 +106,29 @@ def mover(x, y, dx, dy, estrella_x, estrella_y):
       <video id="preview" autoplay playsinline muted></video>
     </section>
   </div>
+  <section class="panel editor-panel" aria-label="Consola Python interactiva">
+    <div class="editor-head">
+      <div><h2>🐍 Laboratorio Python</h2><p class="note">Escribe tu código y pulsa <strong>Ejecutar Python</strong>. Se ejecutará <strong>dentro de esta página</strong>, no en ChromeOS.</p></div>
+      <span class="state" id="editorStatus">Esperando a Python…</span>
+    </div>
+    <div class="editor-control">
+      <label for="examples">Ejemplo:</label>
+      <select id="examples" aria-label="Elegir un ejemplo Python">
+        <option value="saludo">1. Hola mundo</option>
+        <option value="bucle">2. Contar del 1 al 5</option>
+        <option value="matematica">3. Sumar puntos</option>
+        <option value="funcion">4. Crear una función</option>
+      </select>
+      <button id="runCode" disabled>▶ Ejecutar Python</button>
+      <button id="clearOutput" class="secondary">Limpiar resultado</button>
+    </div>
+    <label for="codeEditor" class="hint">Tu código:</label>
+    <textarea id="codeEditor" spellcheck="false" aria-label="Editor de código Python">print("¡Hola desde mi página de juegos!")
+print("Python funciona sin instalar Linux")</textarea>
+    <p class="hint">Consejo: usa <code>print(...)</code> para mostrar resultados. Evita bucles infinitos como <code>while True</code>, porque podrían congelar esta pestaña.</p>
+    <strong>Resultado:</strong>
+    <pre id="consoleOutput" role="status" aria-live="polite">Pulsa «Ejecutar Python».</pre>
+  </section>
   <p class="footnote">Este archivo no instala software, no cambia permisos escolares y no controla las otras aplicaciones de ChromeOS. Para ejecutar Python necesita acceso al componente Pyodide por Internet.</p>
 </main>
 <script>
@@ -107,6 +139,39 @@ const scoreEl = document.getElementById('score');
 const statusText = document.getElementById('statusText');
 const statusDot = document.getElementById('statusDot');
 const modeNote = document.getElementById('modeNote');
+const editorStatus = document.getElementById('editorStatus');
+const runCodeButton = document.getElementById('runCode');
+const codeEditor = document.getElementById('codeEditor');
+const consoleOutput = document.getElementById('consoleOutput');
+const examples = {
+  saludo: 'print("¡Hola desde mi página de juegos!")\nprint("Python funciona sin instalar Linux")',
+  bucle: 'for numero in range(1, 6):\n    print("Número:", numero)',
+  matematica: 'puntos = [10, 20, 30]\nprint("Mis puntos:", puntos)\nprint("Total:", sum(puntos))',
+  funcion: 'def saludar(nombre):\n    return "Hola, " + nombre + "!"\n\nprint(saludar("Jugador"))'
+};
+document.getElementById('examples').addEventListener('change', (event) => {
+  codeEditor.value = examples[event.target.value];
+});
+document.getElementById('clearOutput').addEventListener('click', () => {
+  consoleOutput.textContent = 'Resultado borrado.';
+});
+runCodeButton.addEventListener('click', async () => {
+  if (!pyodide) return;
+  runCodeButton.disabled = true;
+  editorStatus.textContent = 'Ejecutando…';
+  consoleOutput.textContent = '';
+  try {
+    pyodide.globals.set('__user_src', codeEditor.value);
+    const out = await pyodide.runPythonAsync('exec_user_code(__user_src)');
+    consoleOutput.textContent = out || 'Código ejecutado. Usa print(...) para mostrar texto.';
+    editorStatus.textContent = 'Código ejecutado';
+  } catch (error) {
+    consoleOutput.textContent = String(error);
+    editorStatus.textContent = 'Error en el código';
+  } finally {
+    runCodeButton.disabled = !pyodide;
+  }
+});
 const PYTHON_CODE = `import math
 
 def mover(x, y, dx, dy, estrella_x, estrella_y):
@@ -114,6 +179,18 @@ def mover(x, y, dx, dy, estrella_x, estrella_y):
     ny = max(18, min(392, y + dy))
     atrapada = math.hypot(nx - estrella_x, ny - estrella_y) < 35
     return f"{nx},{ny},{int(atrapada)}"
+
+# Esta función mantiene separado el código que escribes del juego.
+import io, contextlib, traceback
+__editor_globals = {"__name__": "__main__"}
+def exec_user_code(source):
+    output = io.StringIO()
+    with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+        try:
+            exec(compile(source, "<editor>", "exec"), __editor_globals)
+        except Exception:
+            traceback.print_exc()
+    return output.getvalue()
 `;
 let pyodide = null;
 let player = { x: 80, y: 205 };
@@ -187,6 +264,7 @@ function move(dx,dy) {
 }
 const directions={ArrowUp:[0,-24],ArrowDown:[0,24],ArrowLeft:[-24,0],ArrowRight:[24,0],w:[0,-24],a:[-24,0],s:[0,24],d:[24,0]};
 document.addEventListener('keydown',e=>{
+  if (e.target.closest('textarea, input, select, [contenteditable="true"]')) return;
   const dir=directions[e.key] || directions[e.key.toLowerCase()];
   if(dir){e.preventDefault();move(...dir);}
 });
@@ -209,15 +287,19 @@ async function startPython(){
       runtime.runPython(PYTHON_CODE);
       pyodide=runtime;
       setPythonStatus('🐍 Python activo dentro de Chrome',true);
+      editorStatus.textContent='Python listo para ejecutar';
+      runCodeButton.disabled=false;
       modeNote.textContent='¡Python ya calcula los movimientos de tu personaje! No se necesitó Linux.';
     } catch(err) {
       setPythonStatus('Python bloqueado o no disponible · juego básico activo',false);
       modeNote.textContent='No se pudo descargar Python. El juego sigue funcionando, pero usa JavaScript.';
+      editorStatus.textContent='Python no disponible';
     }
   };
   script.onerror=()=>{
     setPythonStatus('Python bloqueado o sin conexión · juego básico activo',false);
     modeNote.textContent='No se pudo obtener Pyodide. Puedes jugar en modo básico sin instalar nada.';
+    editorStatus.textContent='Python no disponible';
   };
   document.head.appendChild(script);
 }
