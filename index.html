@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Python Game Control Center</title>
+  <style>
+    :root { --bg:#080e1d; --panel:#111b31; --edge:#2a3856; --text:#f3f7ff; --muted:#b9c6df; --mint:#56f1b1; --blue:#61b9ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--text); background:radial-gradient(circle at 15% 0%, #1b3059, transparent 40%), linear-gradient(155deg, #09111e, #0b1021); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:1020px; margin:0 auto; padding:24px 16px 58px; }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+    .mini { color:var(--mint); font-weight:750; letter-spacing:.13em; font-size:.75rem; text-transform:uppercase; }
+    h1 { margin:7px 0 4px; font-size:clamp(1.7rem,5vw,2.65rem); letter-spacing:-.04em; }
+    .desc { margin:0; color:var(--muted); }
+    .state { border:1px solid var(--edge); border-radius:30px; background:#101d35; font-size:.84rem; color:#d8e5fb; padding:10px 15px; max-width:100%; }
+    .status-dot { display:inline-block; width:9px; height:9px; background:#f5c25d; border-radius:50%; margin-right:7px; }
+    .status-dot.ok { background:var(--mint); }
+    .main-grid { display:grid; grid-template-columns:minmax(0,1fr) 245px; gap:18px; align-items:start; }
+    .panel { background:linear-gradient(145deg, #14213c, #101a30); border:1px solid var(--edge); box-shadow:0 17px 46px #0005; border-radius:22px; padding:17px; }
+    .game-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+    .game-title { font-size:1.1rem; font-weight:750; }
+    .score { border:1px solid #465872; background:#1a2b45; padding:7px 13px; border-radius:30px; color:#ffd96d; font-weight:750; }
+    canvas { width:100%; height:auto; display:block; border-radius:13px; outline:2px solid #314863; background:#122039; cursor:crosshair; touch-action:manipulation; }
+    .game-footer { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px; }
+    button { border:1px solid #527da7; background:#2d6bb1; color:#fff; font:inherit; font-weight:700; border-radius:12px; cursor:pointer; padding:10px 13px; }
+    button:hover { filter:brightness(1.17); }
+    button:focus-visible { outline:3px solid #9cebd8; outline-offset:3px; }
+    .secondary { background:#162743; border-color:#48617c; }
+    .hint { font-size:.9rem; color:var(--muted); }
+    .side h2 { margin:0 0 12px; font-size:1.12rem; }
+    .control { display:grid; grid-template-columns:repeat(3,58px); justify-content:center; gap:7px; margin:20px 0; }
+    .control button { height:52px; font-size:1.45rem; padding:0; border-radius:15px; }
+    .control button:nth-child(1) { grid-column:2; }
+    .control button:nth-child(2) { grid-column:1; grid-row:2; }
+    .control button:nth-child(3) { grid-column:2; grid-row:2; }
+    .control button:nth-child(4) { grid-column:3; grid-row:2; }
+    .note { color:#bdcce2; font-size:.9rem; line-height:1.55; }
+    .bottom { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+    .bottom h2 { margin:0 0 9px; font-size:1.1rem; }
+    pre { overflow:auto; padding:12px; background:#050c19; color:#b9f1d2; border-radius:12px; font-size:.82rem; line-height:1.48; }
+    video { background:black; width:100%; max-height:260px; object-fit:contain; border-radius:10px; display:none; margin-top:12px; }
+    .footnote { color:var(--muted); font-size:.82rem; line-height:1.5; margin-top:18px; }
+    @media(max-width:720px) { .main-grid,.bottom { grid-template-columns:1fr; } .side { text-align:center; } .game-footer { align-items:flex-start; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div>
+      <div class="mini">🎮 Proyecto web · sin instalar Linux</div>
+      <h1>Python Game Control Center</h1>
+      <p class="desc">Juego de estrellas + código Python directamente en Chrome.</p>
+    </div>
+    <div class="state" id="pythonStatus" role="status"><span class="status-dot" id="statusDot"></span><span id="statusText">El juego está listo. Cargando Python…</span></div>
+  </div>
+
+  <div class="main-grid">
+    <section class="panel" aria-label="Juego de estrellas">
+      <div class="game-header"><span class="game-title">⭐ Atrapa las estrellas</span><span class="score">Puntos: <span id="score">0</span></span></div>
+      <canvas id="game" width="720" height="410" tabindex="0" aria-label="Tablero de juego, usa flechas, WASD o haz clic para moverte"></canvas>
+      <div class="game-footer"><span class="hint">Usa ↑ ↓ ← →, WASD, los botones o toca el tablero.</span><button id="restart" class="secondary">↻ Reiniciar</button></div>
+    </section>
+    <aside class="panel side">
+      <h2>🎮 Controles</h2>
+      <p class="note">¡Mueve el cuadrado verde hacia la estrella dorada!</p>
+      <div class="control">
+        <button data-dx="0" data-dy="-24" aria-label="Arriba">↑</button>
+        <button data-dx="-24" data-dy="0" aria-label="Izquierda">←</button>
+        <button data-dx="0" data-dy="24" aria-label="Abajo">↓</button>
+        <button data-dx="24" data-dy="0" aria-label="Derecha">→</button>
+      </div>
+      <p class="note" id="modeNote">Puedes jugar mientras se carga Python. Si la escuela bloquea el componente de Python, el juego seguirá funcionando en modo básico.</p>
+    </aside>
+  </div>
+
+  <div class="bottom">
+    <section class="panel">
+      <h2>🐍 El Python detrás del juego</h2>
+      <p class="note">Cuando cargue Python, será Python quien calcule hacia dónde se mueve el personaje y si atrapó una estrella.</p>
+      <pre><code>import math
+
+def mover(x, y, dx, dy, estrella_x, estrella_y):
+    nx = max(18, min(702, x + dx))
+    ny = max(18, min(392, y + dy))
+    atrapada = math.hypot(nx - estrella_x,
+                          ny - estrella_y) &lt; 35
+    return f"{nx},{ny},{int(atrapada)}"</code></pre>
+    </section>
+    <section class="panel">
+      <h2>🖥️ Vista de pantalla (opcional)</h2>
+      <p class="note">Puedes pedirle a Chrome una vista previa de una pantalla o ventana, pero solo si tú autorizas y la escuela permite compartirla. La vista no se envía a un servidor.</p>
+      <button id="startScreen" class="secondary">Solicitar vista de pantalla</button>
+      <button id="stopScreen" class="secondary" hidden>Detener vista</button>
+      <p class="note" id="screenStatus" aria-live="polite"></p>
+      <video id="preview" autoplay playsinline muted></video>
+    </section>
+  </div>
+  <p class="footnote">Este archivo no instala software, no cambia permisos escolares y no controla las otras aplicaciones de ChromeOS. Para ejecutar Python necesita acceso al componente Pyodide por Internet.</p>
+</main>
+<script>
+'use strict';
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const statusText = document.getElementById('statusText');
+const statusDot = document.getElementById('statusDot');
+const modeNote = document.getElementById('modeNote');
+const PYTHON_CODE = `import math
+
+def mover(x, y, dx, dy, estrella_x, estrella_y):
+    nx = max(18, min(702, x + dx))
+    ny = max(18, min(392, y + dy))
+    atrapada = math.hypot(nx - estrella_x, ny - estrella_y) < 35
+    return f"{nx},{ny},{int(atrapada)}"
+`;
+let pyodide = null;
+let player = { x: 80, y: 205 };
+let star = { x: 510, y: 205 };
+let points = 0;
+let screenStream = null;
+const backgroundStars = Array.from({length:34}, (_,i)=>({x:(i*131+75)%715, y:(i*83+61)%405, r:i%4===0?2:1}));
+function setPythonStatus(label, ok) {
+  statusText.textContent = label;
+  statusDot.classList.toggle('ok', ok);
+}
+function newStar() {
+  star.x = 42 + Math.floor(Math.random()*636);
+  star.y = 42 + Math.floor(Math.random()*326);
+}
+function reset() {
+  player = {x:80, y:205};
+  points = 0;
+  scoreEl.textContent = points;
+  newStar();
+  draw();
+}
+function drawStar(cx,cy,radius) {
+  ctx.beginPath();
+  for (let i=0; i<10; i++) {
+    const a=-Math.PI/2 + i*Math.PI/5;
+    const r=i%2===0?radius:radius*.45;
+    if (i===0) ctx.moveTo(cx+Math.cos(a)*r, cy+Math.sin(a)*r);
+    else ctx.lineTo(cx+Math.cos(a)*r, cy+Math.sin(a)*r);
+  }
+  ctx.closePath();
+  ctx.fillStyle='#ffce5d'; ctx.fill();
+  ctx.strokeStyle='#fff0a1'; ctx.lineWidth=2; ctx.stroke();
+}
+function draw() {
+  const bg=ctx.createLinearGradient(0,0,720,410);
+  bg.addColorStop(0,'#12253f'); bg.addColorStop(1,'#0a1530');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,720,410);
+  for(const s of backgroundStars) {
+    ctx.fillStyle='#6680aa'; ctx.fillRect(s.x,s.y,s.r,s.r);
+  }
+  ctx.beginPath(); ctx.arc(star.x,star.y,34,0,2*Math.PI);
+  ctx.fillStyle='rgba(255,207,96,.12)'; ctx.fill();
+  drawStar(star.x,star.y,20);
+  const x=player.x, y=player.y;
+  ctx.fillStyle='#36dc9e'; ctx.beginPath(); ctx.roundRect(x-18,y-18,36,36,9); ctx.fill();
+  ctx.fillStyle='#0f4c39';
+  ctx.fillRect(x-8,y-5,4,5); ctx.fillRect(x+6,y-5,4,5);
+  ctx.beginPath(); ctx.arc(x,y+3,8,.18*Math.PI,.82*Math.PI); ctx.strokeStyle='#0f4c39'; ctx.lineWidth=2; ctx.stroke();
+}
+function move(dx,dy) {
+  let x,y,hit;
+  if (pyodide) {
+    try {
+      const answer=pyodide.runPython(`mover(${player.x},${player.y},${dx},${dy},${star.x},${star.y})`);
+      [x,y,hit]=answer.split(',').map(Number);
+    } catch(err) {
+      pyodide=null;
+      setPythonStatus('Python dejó de responder; modo básico activo',false);
+      modeNote.textContent='Python no está disponible en este momento. Sigue jugando en modo básico.';
+    }
+  }
+  if (!pyodide) {
+    x=Math.max(18,Math.min(702,player.x+dx));
+    y=Math.max(18,Math.min(392,player.y+dy));
+    hit=Math.hypot(x-star.x,y-star.y)<35?1:0;
+  }
+  player.x=x; player.y=y;
+  if (hit) { points++; scoreEl.textContent=points; newStar(); }
+  draw();
+}
+const directions={ArrowUp:[0,-24],ArrowDown:[0,24],ArrowLeft:[-24,0],ArrowRight:[24,0],w:[0,-24],a:[-24,0],s:[0,24],d:[24,0]};
+document.addEventListener('keydown',e=>{
+  const dir=directions[e.key] || directions[e.key.toLowerCase()];
+  if(dir){e.preventDefault();move(...dir);}
+});
+document.querySelectorAll('[data-dx]').forEach(btn=>btn.addEventListener('click',()=>move(Number(btn.dataset.dx),Number(btn.dataset.dy))));
+canvas.addEventListener('pointerdown',e=>{
+  const box=canvas.getBoundingClientRect();
+  const targetX=Math.round((e.clientX-box.left)*canvas.width/box.width);
+  const targetY=Math.round((e.clientY-box.top)*canvas.height/box.height);
+  move(targetX-player.x,targetY-player.y);
+  canvas.focus();
+});
+document.getElementById('restart').addEventListener('click',reset);
+async function startPython(){
+  const script=document.createElement('script');
+  script.src='https://cdn.jsdelivr.net/pyodide/v0.29.5/full/pyodide.js';
+  script.onload=async()=>{
+    try {
+      if(typeof loadPyodide!=='function') throw new Error('Pyodide no disponible');
+      const runtime=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.29.5/full/'});
+      runtime.runPython(PYTHON_CODE);
+      pyodide=runtime;
+      setPythonStatus('🐍 Python activo dentro de Chrome',true);
+      modeNote.textContent='¡Python ya calcula los movimientos de tu personaje! No se necesitó Linux.';
+    } catch(err) {
+      setPythonStatus('Python bloqueado o no disponible · juego básico activo',false);
+      modeNote.textContent='No se pudo descargar Python. El juego sigue funcionando, pero usa JavaScript.';
+    }
+  };
+  script.onerror=()=>{
+    setPythonStatus('Python bloqueado o sin conexión · juego básico activo',false);
+    modeNote.textContent='No se pudo obtener Pyodide. Puedes jugar en modo básico sin instalar nada.';
+  };
+  document.head.appendChild(script);
+}
+const video=document.getElementById('preview');
+document.getElementById('startScreen').addEventListener('click',async()=>{
+  const status=document.getElementById('screenStatus');
+  if(!navigator.mediaDevices?.getDisplayMedia){status.textContent='Este navegador no permite la vista de pantalla aquí.';return;}
+  try {
+    screenStream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
+    video.srcObject=screenStream; video.style.display='block';
+    document.getElementById('stopScreen').hidden=false;
+    status.textContent='Vista local activa. Puedes detenerla cuando quieras.';
+    screenStream.getVideoTracks()[0].addEventListener('ended',stopScreen,{once:true});
+  } catch(err){status.textContent='No se compartió la pantalla (permiso denegado o función restringida).';}
+});
+function stopScreen(){
+  if(screenStream){screenStream.getTracks().forEach(t=>t.stop());screenStream=null;}
+  video.srcObject=null;video.style.display='none';
+  document.getElementById('stopScreen').hidden=true;
+  document.getElementById('screenStatus').textContent='Vista detenida.';
+}
+document.getElementById('stopScreen').addEventListener('click',stopScreen);
+reset();startPython();
+</script>
+</body>
+</html>
