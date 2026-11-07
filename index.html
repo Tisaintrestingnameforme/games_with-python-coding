@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0b1020">
-  <title>Python Studio · Game Center</title>
+  <title>Python Studio · Game Center V7</title>
   <style>
     :root{--bg:#090e1a;--panel:#10182a;--panel2:#0c1424;--line:#27364e;--line2:#344662;--text:#edf3ff;--muted:#98acc9;--mint:#50e8bd;--blue:#7daaff;--gold:#f6d383;--pink:#ed9ac4;--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
     *{box-sizing:border-box}
@@ -86,6 +86,18 @@
     .footer-main{margin-top:29px;font-size:12px;color:#7f93ae;text-align:center}
     @media(max-width:850px){.workspace{grid-template-columns:1fr}.outcard{min-height:260px}.games{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:600px){.games{grid-template-columns:1fr}.shell{padding-top:14px}.brand-title{font-size:15px}.nav button{padding:9px 12px}.editor-box{margin:0 10px 10px;min-height:350px}.code-layer,.code-input{font-size:12px;line-height:22px}.line-numbers{font-size:12px;line-height:22px;width:41px;padding-right:7px}.code-layer,.code-input{padding-left:52px}.toolbar{padding:12px 10px}.card-head{padding:13px}.toolbar .spacer{display:none}}
+
+    /* Reproductor: carga los juegos externos solo tras hacer clic. */
+    .player-overlay{position:fixed;inset:0;z-index:50;background:#060910ef;display:flex;align-items:center;justify-content:center;padding:14px}
+    .player-shell{width:min(1180px,100%);height:min(810px,96vh);display:flex;flex-direction:column;background:#101827;border:1px solid #52657e;border-radius:16px;overflow:hidden;box-shadow:0 28px 110px #000b}
+    .player-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;padding:12px 14px;border-bottom:1px solid var(--line);background:#101d30}
+    .player-title{font-weight:800;font-size:15px}
+    .player-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .player-actions a{text-decoration:none}
+    .player-frame{border:0;width:100%;height:100%;background:#05080c;flex:1}
+    .game-button{width:100%;text-align:left;font:inherit;appearance:none}
+    .play-overlay-label{position:absolute;z-index:3;inset:auto 12px 12px auto;background:#061425ee;color:#b1ffe3;padding:7px 12px;border:1px solid #63e6b97d;border-radius:10px;font-weight:850;font-size:13px}
+    .gfoot{display:flex;align-items:center;justify-content:space-between}
     @media(prefers-reduced-motion:reduce){.game{transition:none}}
   </style>
 </head>
@@ -140,25 +152,45 @@ for nivel in range(1, 6):
       </section>
 
       <section id="gamesView" hidden aria-label="Biblioteca de juegos">
-        <div class="hero"><span class="eyebrow">Tu biblioteca</span><h1>Elige tu aventura.</h1><p class="lead">Pulsa la imagen o el nombre del juego. Toda la tarjeta es clicable.</p></div>
-        <div class="games">
-          <a class="game" href="https://doom.ws/" target="_blank" rel="noopener noreferrer" aria-label="DOOM: abrir juego en otra pestaña">
-            <div class="poster" data-emoji="🔫"><img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2280/header.jpg" alt="Portada de DOOM" loading="lazy"><span class="tag">PORTAL WEB</span></div>
-            <div class="gbody"><h2>DOOM</h2><p>Disparos, monstruos y acción clásica en primera persona.</p></div><div class="gfoot">Abrir DOOM ↗</div>
-          </a>
-          <a class="game" href="https://terraria.r58playz.dev/app.php" target="_blank" rel="noopener noreferrer" aria-label="Terraria: abrir proyecto comunitario en otra pestaña">
-            <div class="poster" data-emoji="⛏️"><img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg" alt="Portada de Terraria" loading="lazy"><span class="tag">NECESITA TU COPIA</span></div>
-            <div class="gbody"><h2>Terraria</h2><p>Port comunitario para navegador; requiere los archivos de una copia legítima.</p></div><div class="gfoot">Abrir proyecto ↗</div>
-          </a>
-          <a class="game" href="https://store.steampowered.com/app/367520/Hollow_Knight/" target="_blank" rel="noopener noreferrer" aria-label="Hollow Knight: abrir página oficial, no jugable en navegador">
-            <div class="poster" data-emoji="⚔️"><img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/367520/header.jpg" alt="Portada de Hollow Knight" loading="lazy"><span class="tag">SIN WEB OFICIAL</span></div>
-            <div class="gbody"><h2>Hollow Knight</h2><p>Abre el juego original en Steam. No tiene versión web oficial completa.</p></div><div class="gfoot">Ver juego oficial ↗</div>
-          </a>
+        <div class="hero">
+          <span class="eyebrow">Juegos sin instalación</span>
+          <h1>Haz clic y juega.</h1>
+          <p class="lead">Pulsa la portada o el nombre. Los juegos disponibles se ejecutan en el navegador, sin archivos .exe ni instalar Linux.</p>
         </div>
-        <div class="games-note">Estos son enlaces externos: los juegos no están instalados dentro de esta página. Hollow Knight abre su ficha oficial, no una versión jugable; Terraria requiere una copia propia. Las políticas del Chromebook escolar podrían restringir el acceso.</div>
+        <div class="games">
+          <a class="game" href="https://doom.ethanantonio.com/vendor/" target="_blank" rel="noopener noreferrer" aria-label="Abrir DOOM Shareware en el navegador, sin instalación">
+            <div class="poster" data-emoji="🔫"><img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2280/header.jpg" alt="Portada de DOOM" loading="lazy"><span class="tag">DOOM SHAREWARE · WEB</span><span class="play-overlay-label">▶ Abrir</span></div>
+            <div class="gbody"><h2>DOOM</h2><p>El clásico de disparos. Elige DOOM Shareware y pulsa Start DOOM; no requiere instalar nada.</p></div><div class="gfoot">Abrir en navegador <span>↗</span></div>
+          </a>
+          <button class="game game-button" type="button" data-game="mineblocks" aria-label="Jugar Mine Blocks dentro de esta página">
+            <div class="poster" data-emoji="⛏️"><img src="https://i.imgur.com/C13ZlrB.png" alt="Captura de Mine Blocks" loading="lazy"><span class="tag">EXPLORAR Y CONSTRUIR</span><span class="play-overlay-label">▶ Jugar</span></div>
+            <div class="gbody"><h2>Mine Blocks</h2><p>Supervivencia, minería, construcción y aventura 2D. Alternativa para quienes disfrutan Terraria.</p></div><div class="gfoot">Jugar aquí <span>▶</span></div>
+          </button>
+          <button class="game game-button" type="button" data-game="kenzu" aria-label="Jugar Kenzu Shadow and Light dentro de esta página">
+            <div class="poster" data-emoji="⚔️"><img src="https://img.itch.zone/aW1nLzMxMjE3NDk3LmdpZg%3D%3D/original/tbvstj.gif" alt="Captura animada de Kenzu Shadow and Light" loading="lazy"><span class="tag">METROIDVANIA · WEB</span><span class="play-overlay-label">▶ Jugar</span></div>
+            <div class="gbody"><h2>Kenzu: Shadow and Light</h2><p>Exploración, enemigos y jefes. Parecido al estilo de Hollow Knight; juego en desarrollo.</p></div><div class="gfoot">Jugar aquí <span>▶</span></div>
+          </button>
+          <button class="game game-button" type="button" data-game="celeste" aria-label="Jugar Celeste Classic 2 dentro de esta página">
+            <div class="poster" data-emoji="🏔️"><img src="https://www.lexaloffle.com/media/25119/celeste%20classic%202_011.png" alt="Captura de Celeste Classic 2" loading="lazy"><span class="tag">PLATAFORMAS · OFICIAL</span><span class="play-overlay-label">▶ Jugar</span></div>
+            <div class="gbody"><h2>Celeste Classic 2</h2><p>Aventura de plataformas con saltos difíciles y gancho. Edición web creada por sus desarrolladores.</p></div><div class="gfoot">Jugar aquí <span>▶</span></div>
+          </button>
+        </div>
+        <div class="games-note">No se incluyen Terraria ni Hollow Knight completos: sus ediciones oficiales no se pueden abrir y jugar con un clic en una página web. Los otros títulos son juegos independientes, claramente identificados, alojados por sus autores. Tu navegador necesita conexión a sus servidores y los filtros escolares pueden restringirlos.</div>
       </section>
     </main>
-    <p class="footer-main">Python Studio · Game Center · Proyecto web personal</p>
+    <div id="playerOverlay" class="player-overlay" hidden role="dialog" aria-modal="true" aria-label="Reproductor de juegos">
+      <div class="player-shell" id="playerShell">
+        <div class="player-bar"><div class="player-title" id="playerTitle">Juego</div>
+          <div class="player-actions">
+            <a id="playerOriginal" class="pill" href="#" target="_blank" rel="noopener noreferrer">Abrir en sitio original ↗</a>
+            <button type="button" class="pill" id="playerFullscreen">⛶ Pantalla completa</button>
+            <button type="button" class="pill primary" id="playerClose">✕ Cerrar</button>
+          </div>
+        </div>
+        <iframe class="player-frame" id="playerFrame" title="Juego en navegador" allow="fullscreen; autoplay; gamepad" allowfullscreen loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+    </div>
+    <p class="footer-main">Python Studio V7 · Game Center · Juegos externos en navegador</p>
   </div>
   <script>
     'use strict';
@@ -175,6 +207,40 @@ for nivel in range(1, 6):
       tabGames.setAttribute('aria-pressed',String(games));
       if(location.hash!=='#'+view) history.replaceState(null,'','#'+view);
     }
+    // Los portales externos se cargan solo al pulsar Jugar. No son proxies ni copias de los juegos.
+    const gameSources={
+      mineblocks:{name:'Mine Blocks',embed:'https://mineblocks.com/1/embed',original:'https://zanzlanz.com/MineBlocks'},
+      kenzu:{name:'Kenzu: Shadow and Light',embed:'https://html-classic.itch.zone/html/20056820/index.html?v=1793041655',original:'https://lambdaforge.itch.io/kenzu'},
+      celeste:{name:'Celeste Classic 2',embed:'https://html-classic.itch.zone/html/3276960/index.html',original:'https://maddymakesgamesinc.itch.io/celeste-classic-2'}
+    };
+    const overlay=document.getElementById('playerOverlay');
+    const playerFrame=document.getElementById('playerFrame');
+    const playerTitle=document.getElementById('playerTitle');
+    const playerOriginal=document.getElementById('playerOriginal');
+    const playerClose=document.getElementById('playerClose');
+    const playerShell=document.getElementById('playerShell');
+    function openGame(key){
+      const game=gameSources[key];if(!game)return;
+      playerTitle.textContent='🎮 '+game.name;
+      playerOriginal.href=game.original;
+      overlay.hidden=false;
+      document.body.style.overflow='hidden';
+      playerFrame.src=game.embed;
+      playerClose.focus();
+    }
+    function closeGame(){
+      overlay.hidden=true;
+      playerFrame.src='about:blank';
+      document.body.style.overflow='';
+    }
+    document.querySelectorAll('[data-game]').forEach(card=>card.addEventListener('click',()=>openGame(card.dataset.game)));
+    playerClose.addEventListener('click',closeGame);
+    overlay.addEventListener('click',e=>{if(e.target===overlay)closeGame()});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden)closeGame()});
+    document.getElementById('playerFullscreen').addEventListener('click',()=>{
+      if(!document.fullscreenElement&&playerShell.requestFullscreen)playerShell.requestFullscreen().catch(()=>{});
+      else if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+    });
     tabPython.addEventListener('click',()=>switchView('python'));
     tabGames.addEventListener('click',()=>switchView('games'));
     document.getElementById('brandHome').addEventListener('click',e=>{e.preventDefault();switchView('python')});
