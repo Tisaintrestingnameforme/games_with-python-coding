@@ -2,327 +2,297 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>Python Game Control Center</title>
+  <meta name="theme-color" content="#0b1020">
+  <title>Python Studio · Game Center</title>
   <style>
-    :root { --bg:#080e1d; --panel:#111b31; --edge:#2a3856; --text:#f3f7ff; --muted:#b9c6df; --mint:#56f1b1; --blue:#61b9ff; }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; color:var(--text); background:radial-gradient(circle at 15% 0%, #1b3059, transparent 40%), linear-gradient(155deg, #09111e, #0b1021); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    main { max-width:1020px; margin:0 auto; padding:24px 16px 58px; }
-    .top { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
-    .mini { color:var(--mint); font-weight:750; letter-spacing:.13em; font-size:.75rem; text-transform:uppercase; }
-    h1 { margin:7px 0 4px; font-size:clamp(1.7rem,5vw,2.65rem); letter-spacing:-.04em; }
-    .desc { margin:0; color:var(--muted); }
-    .state { border:1px solid var(--edge); border-radius:30px; background:#101d35; font-size:.84rem; color:#d8e5fb; padding:10px 15px; max-width:100%; }
-    .status-dot { display:inline-block; width:9px; height:9px; background:#f5c25d; border-radius:50%; margin-right:7px; }
-    .status-dot.ok { background:var(--mint); }
-    .main-grid { display:grid; grid-template-columns:minmax(0,1fr) 245px; gap:18px; align-items:start; }
-    .panel { background:linear-gradient(145deg, #14213c, #101a30); border:1px solid var(--edge); box-shadow:0 17px 46px #0005; border-radius:22px; padding:17px; }
-    .game-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
-    .game-title { font-size:1.1rem; font-weight:750; }
-    .score { border:1px solid #465872; background:#1a2b45; padding:7px 13px; border-radius:30px; color:#ffd96d; font-weight:750; }
-    canvas { width:100%; height:auto; display:block; border-radius:13px; outline:2px solid #314863; background:#122039; cursor:crosshair; touch-action:manipulation; }
-    .game-footer { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px; }
-    button { border:1px solid #527da7; background:#2d6bb1; color:#fff; font:inherit; font-weight:700; border-radius:12px; cursor:pointer; padding:10px 13px; }
-    button:hover { filter:brightness(1.17); }
-    button:focus-visible { outline:3px solid #9cebd8; outline-offset:3px; }
-    .secondary { background:#162743; border-color:#48617c; }
-    .hint { font-size:.9rem; color:var(--muted); }
-    .side h2 { margin:0 0 12px; font-size:1.12rem; }
-    .control { display:grid; grid-template-columns:repeat(3,58px); justify-content:center; gap:7px; margin:20px 0; }
-    .control button { height:52px; font-size:1.45rem; padding:0; border-radius:15px; }
-    .control button:nth-child(1) { grid-column:2; }
-    .control button:nth-child(2) { grid-column:1; grid-row:2; }
-    .control button:nth-child(3) { grid-column:2; grid-row:2; }
-    .control button:nth-child(4) { grid-column:3; grid-row:2; }
-    .note { color:#bdcce2; font-size:.9rem; line-height:1.55; }
-    .bottom { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
-    .bottom h2 { margin:0 0 9px; font-size:1.1rem; }
-    pre { overflow:auto; padding:12px; background:#050c19; color:#b9f1d2; border-radius:12px; font-size:.82rem; line-height:1.48; }
-    video { background:black; width:100%; max-height:260px; object-fit:contain; border-radius:10px; display:none; margin-top:12px; }
-    .editor-panel { margin-top:18px; }
-    .editor-head { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
-    .editor-head h2 { margin:0 0 8px; }
-    .editor-control { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:12px 0; }
-    select { background:#172944; color:var(--text); border:1px solid #597494; border-radius:10px; padding:10px 13px; font:inherit; max-width:100%; }
-    textarea { width:100%; min-height:180px; resize:vertical; background:#060f20; color:#aef2bf; border:1px solid #426384; border-radius:12px; padding:15px; font:500 1rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; tab-size:4; }
-    textarea:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
-    #consoleOutput { min-height:100px; max-height:290px; white-space:pre-wrap; overflow-wrap:anywhere; color:#d9edff; }
-    .editor-panel .note { margin:8px 0; }
-    .footnote { color:var(--muted); font-size:.82rem; line-height:1.5; margin-top:18px; }
-    @media(max-width:720px) { .main-grid,.bottom { grid-template-columns:1fr; } .side { text-align:center; } .game-footer { align-items:flex-start; } }
+    :root{--bg:#090e1a;--panel:#10182a;--panel2:#0c1424;--line:#27364e;--line2:#344662;--text:#edf3ff;--muted:#98acc9;--mint:#50e8bd;--blue:#7daaff;--gold:#f6d383;--pink:#ed9ac4;--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse 55% 40% at 89% -8%,#1b3159aa,transparent),radial-gradient(ellipse 45% 45% at -12% 100%,#123a40aa,transparent),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+    button,textarea,select{font:inherit}
+    button{cursor:pointer}
+    button:focus-visible,a:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #87dbff;outline-offset:3px}
+    .shell{max-width:1220px;margin:auto;padding:24px clamp(14px,3vw,38px) 60px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:25px;border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text)}
+    .mark{width:44px;height:44px;display:grid;place-items:center;background:linear-gradient(140deg,#42e1af,#6e9cff);border-radius:14px;color:#0b2330;font-size:24px;box-shadow:0 6px 25px #63e2c433}
+    .brand-title{font-size:17px;font-weight:850;letter-spacing:-.4px;line-height:1.1}
+    .brand-sub{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:1.5px;margin-top:5px}
+    .nav{display:flex;gap:6px;padding:5px;border-radius:13px;background:#111c2f;border:1px solid var(--line)}
+    .nav button{border:0;color:#b7c8e2;background:transparent;border-radius:9px;padding:10px 18px;font-weight:750;display:flex;align-items:center;gap:8px}
+    .nav button.active{background:#2a3b57;color:white;box-shadow:0 3px 12px #0003}
+    .hero{margin:30px 0 22px}
+    .eyebrow{font-size:11px;letter-spacing:2px;color:var(--mint);font-weight:850;text-transform:uppercase}
+    h1{font-size:clamp(30px,4.5vw,49px);line-height:1.16;letter-spacing:-1.7px;margin:10px 0 8px}
+    .lead{color:var(--muted);font-size:15px;margin:0;max-width:730px}
+    .status{display:inline-flex;align-items:center;gap:9px;margin-top:17px;border:1px solid #3c4d64;background:#101f30;border-radius:30px;padding:7px 12px;color:#d0dded;font-size:12px;font-weight:750}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px #e8a94216}
+    .status.ready{border-color:#286653;color:#9bf8ce;background:#0b2928}
+    .status.ready .dot{background:var(--mint);box-shadow:0 0 0 3px #56dfad28}
+    .status.error{border-color:#6b4050;color:#ffb6c1}
+    .status.error .dot{background:#ff869e}
+    .workspace{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(285px,.9fr);gap:17px;align-items:stretch}
+    .card{background:linear-gradient(160deg,#121d31,#0e1728);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 15px 50px #0003}
+    .card-head{padding:16px 19px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+    .card-title{font-weight:820;display:flex;align-items:center;gap:10px}
+    .filedot{display:inline-block;width:8px;height:8px;border-radius:100%;background:var(--mint);box-shadow:0 0 12px #63efbd55}
+    .mini-tag{color:#97a9c2;font-size:12px;font-family:var(--mono)}
+    .toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;padding:14px 18px}
+    .pill{border:1px solid #3a4e6a;border-radius:9px;background:#16253a;color:#e4efff;padding:8px 11px;font-weight:650;font-size:13px}
+    .pill:hover{background:#1d304a}
+    .pill.primary{border-color:#71eccc;background:var(--mint);color:#08272a;font-weight:850}
+    .pill.primary:hover{filter:brightness(1.1)}
+    .pill:disabled{opacity:.48;cursor:default;filter:none}
+    select.pill{max-width:100%;background:#16253a;color:#e4efff}
+    .toolbar .spacer{flex:1}
+    .editor-box{position:relative;margin:0 18px 13px;min-height:345px;height:clamp(345px,46vw,525px);background:#090f1d;border:1px solid #334761;border-radius:12px;overflow:hidden}
+    .editor-box:focus-within{border-color:#7eacd8;box-shadow:0 0 0 2px #5485b329}
+    .editor-surface{position:absolute;inset:0;overflow:hidden}
+    .line-numbers{position:absolute;left:0;top:0;width:52px;height:100%;overflow:hidden;text-align:right;padding:16px 12px 16px 6px;background:#0b1425;border-right:1px solid #27354b;color:#526681;font:14px/24px var(--mono);white-space:pre;user-select:none;pointer-events:none}
+    .code-layer,.code-input{position:absolute;inset:0;display:block;margin:0;border:0;border-radius:0;width:100%;height:100%;padding:16px 19px 16px 69px;font:14px/24px var(--mono);white-space:pre;tab-size:4;letter-spacing:0;overflow:auto;overflow-wrap:normal;text-align:left}
+    .code-layer{pointer-events:none;color:#dce8f5;background:transparent;scrollbar-width:none;z-index:1}
+    .code-layer::-webkit-scrollbar{display:none}
+    .code-layer code{font:inherit;display:block;min-width:max-content}
+    .code-input{z-index:2;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:#fff;resize:none;outline:none;scrollbar-color:#344e6c transparent;scrollbar-width:thin}
+    .code-input::selection{background:#648cfb77;-webkit-text-fill-color:transparent}
+    .token-keyword{color:#bc9cfa;font-weight:650}
+    .token-string{color:#a5e0a1}
+    .token-comment{color:#708ba7;font-style:italic}
+    .token-number{color:#f7c784}
+    .token-builtin{color:#7ebfff}
+    .token-decorator{color:#e8a4cc}
+    .editor-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding:11px 18px;color:var(--muted);font:12px var(--mono)}
+    .outcard{display:flex;flex-direction:column;min-height:490px}
+    .output{flex:1;padding:18px;margin:0;min-height:200px;white-space:pre-wrap;overflow-wrap:anywhere;color:#bbf4d1;font:13px/1.8 var(--mono);overflow:auto;max-height:560px}
+    .outcard .footer{border-top:1px solid var(--line);padding:13px 17px;color:#a0b1cb;font-size:12px}
+    .tip{margin:17px 0 0;background:#101b2b;border:1px solid #2b3b50;padding:13px 16px;border-radius:12px;color:#b5c7df;font-size:13px}
+    .tip code{font-family:var(--mono);color:#9ee8ce}
+    [hidden]{display:none!important}
+    .games{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:25px}
+    .game{display:flex;min-width:0;flex-direction:column;text-decoration:none;color:inherit;background:#132137;border:1px solid var(--line2);border-radius:17px;overflow:hidden;box-shadow:0 12px 28px #0003;transition:transform .15s,border-color .15s}
+    .game:hover,.game:focus-visible{transform:translateY(-4px);border-color:var(--mint)}
+    .poster{aspect-ratio:460/250;position:relative;background:linear-gradient(120deg,#1a3a4b,#15223b);overflow:hidden}
+    .poster:before{content:attr(data-emoji);position:absolute;inset:0;display:grid;place-items:center;font-size:72px;opacity:.85}
+    .poster img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1}
+    .poster .tag{z-index:2}
+    .tag{position:absolute;bottom:10px;left:11px;max-width:calc(100% - 22px);font-size:10px;font-weight:850;letter-spacing:.3px;background:#071322db;border:1px solid #ffffff36;color:white;border-radius:6px;padding:6px 8px}
+    .gbody{padding:17px;flex:1}
+    .gbody h2{font-size:22px;margin:0 0 6px;letter-spacing:-.5px}
+    .gbody p{font-size:13px;color:#abbfda;line-height:1.55;margin:0}
+    .gfoot{padding:0 17px 17px;color:#80efce;font-weight:750;font-size:12px}
+    .games-note{margin-top:19px;font-size:13px;color:var(--muted);line-height:1.7;background:#101b2c;border:1px solid var(--line);border-radius:13px;padding:15px 17px}
+    .footer-main{margin-top:29px;font-size:12px;color:#7f93ae;text-align:center}
+    @media(max-width:850px){.workspace{grid-template-columns:1fr}.outcard{min-height:260px}.games{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:600px){.games{grid-template-columns:1fr}.shell{padding-top:14px}.brand-title{font-size:15px}.nav button{padding:9px 12px}.editor-box{margin:0 10px 10px;min-height:350px}.code-layer,.code-input{font-size:12px;line-height:22px}.line-numbers{font-size:12px;line-height:22px;width:41px;padding-right:7px}.code-layer,.code-input{padding-left:52px}.toolbar{padding:12px 10px}.card-head{padding:13px}.toolbar .spacer{display:none}}
+    @media(prefers-reduced-motion:reduce){.game{transition:none}}
   </style>
 </head>
 <body>
-<main>
-  <div class="top">
-    <div>
-      <div class="mini">🎮 Proyecto web · sin instalar Linux</div>
-      <h1>Python Game Control Center</h1>
-      <p class="desc">Juego de estrellas + código Python directamente en Chrome.</p>
-    </div>
-    <div class="state" id="pythonStatus" role="status"><span class="status-dot" id="statusDot"></span><span id="statusText">El juego está listo. Cargando Python…</span></div>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#python" id="brandHome">
+        <span class="mark">🐍</span><span><span class="brand-title">PYTHON STUDIO</span><span class="brand-sub" style="display:block">GAME CENTER</span></span>
+      </a>
+      <nav class="nav" aria-label="Navegación principal">
+        <button class="active" id="tabPython" type="button" aria-pressed="true">⌨ Python</button>
+        <button id="tabGames" type="button" aria-pressed="false">🎮 Games</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="pythonView" aria-label="Editor de Python">
+        <div class="hero"><span class="eyebrow">Python · En tu navegador</span><h1>Tu código, tu espacio.</h1><p class="lead">Escribe Python con colores, números de línea y una consola para ver el resultado. Sin instalar Linux.</p><div id="pythonStatus" class="status" role="status"><span class="dot"></span><span id="statusText">Cargando Python…</span></div></div>
+        <div class="workspace">
+          <section class="card" aria-label="Editor de código">
+            <div class="card-head"><span class="card-title"><span class="filedot"></span> main.py</span><span class="mini-tag">PYTHON 3 · EDITOR</span></div>
+            <div class="toolbar">
+              <label for="examples" style="color:var(--muted);font-size:12px">Ejemplos</label>
+              <select id="examples" class="pill" aria-label="Elegir ejemplo de código">
+                <option value="saludo">Hola mundo</option>
+                <option value="bucle">Bucles</option>
+                <option value="funcion">Funciones</option>
+                <option value="juego">Mini aventura de texto</option>
+              </select>
+              <span class="spacer"></span>
+              <button id="resetCode" type="button" class="pill">↺ Restablecer</button>
+              <button id="runCode" type="button" class="pill primary" disabled>▶ Ejecutar</button>
+            </div>
+            <div class="editor-box" id="editorBox">
+              <div class="editor-surface" aria-hidden="true">
+                <pre class="line-numbers" id="lineNumbers">1</pre>
+                <pre class="code-layer" id="codeLayer"><code id="highlighted"></code></pre>
+              </div>
+              <textarea id="codeEditor" class="code-input" aria-label="Escribir código Python" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off">print("¡Hola desde Python Studio!")
+for nivel in range(1, 6):
+    print("Nivel", nivel)</textarea>
+            </div>
+            <div class="editor-foot"><span>UTF-8 · Python</span><span id="cursorInfo">Línea 1 · Col 1</span><span>Ctrl + Enter para ejecutar</span></div>
+          </section>
+          <section class="card outcard" aria-label="Consola Python">
+            <div class="card-head"><span class="card-title">▣ Consola</span><button id="clearOutput" type="button" class="pill">Limpiar</button></div>
+            <pre id="consoleOutput" class="output" role="status" aria-live="polite">Cuando Python termine de cargar, presiona ▶ Ejecutar para ver el resultado aquí.</pre>
+            <div class="footer"><span id="execStatus">Esperando a Python…</span></div>
+          </section>
+        </div>
+        <p class="tip">💡 <strong>Consejo:</strong> usa <code>print(...)</code> para mostrar mensajes. Tu código se ejecuta <strong>dentro de esta pestaña</strong>; no controla otras aplicaciones de ChromeOS. Evita bucles infinitos.</p>
+      </section>
+
+      <section id="gamesView" hidden aria-label="Biblioteca de juegos">
+        <div class="hero"><span class="eyebrow">Tu biblioteca</span><h1>Elige tu aventura.</h1><p class="lead">Pulsa la imagen o el nombre del juego. Toda la tarjeta es clicable.</p></div>
+        <div class="games">
+          <a class="game" href="https://doom.ws/" target="_blank" rel="noopener noreferrer" aria-label="DOOM: abrir juego en otra pestaña">
+            <div class="poster" data-emoji="🔫"><img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2280/header.jpg" alt="Portada de DOOM" loading="lazy"><span class="tag">PORTAL WEB</span></div>
+            <div class="gbody"><h2>DOOM</h2><p>Disparos, monstruos y acción clásica en primera persona.</p></div><div class="gfoot">Abrir DOOM ↗</div>
+          </a>
+          <a class="game" href="https://terraria.r58playz.dev/app.php" target="_blank" rel="noopener noreferrer" aria-label="Terraria: abrir proyecto comunitario en otra pestaña">
+            <div class="poster" data-emoji="⛏️"><img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg" alt="Portada de Terraria" loading="lazy"><span class="tag">NECESITA TU COPIA</span></div>
+            <div class="gbody"><h2>Terraria</h2><p>Port comunitario para navegador; requiere los archivos de una copia legítima.</p></div><div class="gfoot">Abrir proyecto ↗</div>
+          </a>
+          <a class="game" href="https://store.steampowered.com/app/367520/Hollow_Knight/" target="_blank" rel="noopener noreferrer" aria-label="Hollow Knight: abrir página oficial, no jugable en navegador">
+            <div class="poster" data-emoji="⚔️"><img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/367520/header.jpg" alt="Portada de Hollow Knight" loading="lazy"><span class="tag">SIN WEB OFICIAL</span></div>
+            <div class="gbody"><h2>Hollow Knight</h2><p>Abre el juego original en Steam. No tiene versión web oficial completa.</p></div><div class="gfoot">Ver juego oficial ↗</div>
+          </a>
+        </div>
+        <div class="games-note">Estos son enlaces externos: los juegos no están instalados dentro de esta página. Hollow Knight abre su ficha oficial, no una versión jugable; Terraria requiere una copia propia. Las políticas del Chromebook escolar podrían restringir el acceso.</div>
+      </section>
+    </main>
+    <p class="footer-main">Python Studio · Game Center · Proyecto web personal</p>
   </div>
+  <script>
+    'use strict';
+    const tabPython=document.getElementById('tabPython');
+    const tabGames=document.getElementById('tabGames');
+    const pythonView=document.getElementById('pythonView');
+    const gamesView=document.getElementById('gamesView');
+    function switchView(view){
+      const games=view==='games';
+      pythonView.hidden=games; gamesView.hidden=!games;
+      tabPython.classList.toggle('active',!games);
+      tabGames.classList.toggle('active',games);
+      tabPython.setAttribute('aria-pressed',String(!games));
+      tabGames.setAttribute('aria-pressed',String(games));
+      if(location.hash!=='#'+view) history.replaceState(null,'','#'+view);
+    }
+    tabPython.addEventListener('click',()=>switchView('python'));
+    tabGames.addEventListener('click',()=>switchView('games'));
+    document.getElementById('brandHome').addEventListener('click',e=>{e.preventDefault();switchView('python')});
+    window.addEventListener('hashchange',()=>switchView(location.hash==='#games'?'games':'python'));
+    switchView(location.hash==='#games'?'games':'python');
 
-  <div class="main-grid">
-    <section class="panel" aria-label="Juego de estrellas">
-      <div class="game-header"><span class="game-title">⭐ Atrapa las estrellas</span><span class="score">Puntos: <span id="score">0</span></span></div>
-      <canvas id="game" width="720" height="410" tabindex="0" aria-label="Tablero de juego, usa flechas, WASD o haz clic para moverte"></canvas>
-      <div class="game-footer"><span class="hint">Usa ↑ ↓ ← →, WASD, los botones o toca el tablero.</span><button id="restart" class="secondary">↻ Reiniciar</button></div>
-    </section>
-    <aside class="panel side">
-      <h2>🎮 Controles</h2>
-      <p class="note">¡Mueve el cuadrado verde hacia la estrella dorada!</p>
-      <div class="control">
-        <button data-dx="0" data-dy="-24" aria-label="Arriba">↑</button>
-        <button data-dx="-24" data-dy="0" aria-label="Izquierda">←</button>
-        <button data-dx="0" data-dy="24" aria-label="Abajo">↓</button>
-        <button data-dx="24" data-dy="0" aria-label="Derecha">→</button>
-      </div>
-      <p class="note" id="modeNote">Puedes jugar mientras se carga Python. Si la escuela bloquea el componente de Python, el juego seguirá funcionando en modo básico.</p>
-    </aside>
-  </div>
+    const examples={
+      saludo:'print("¡Hola desde Python Studio!")\nfor nivel in range(1, 6):\n    print("Nivel", nivel)',
+      bucle:'for numero in range(1, 11):\n    print(numero, "x 2 =", numero * 2)',
+      funcion:'def saludar(nombre):\n    return "Hola, " + nombre\n\nprint(saludar("Jugador"))',
+      juego:'import random\n\nvida = 100\nenemigo = random.randint(1, 10)\nprint("⚔️ ¡Comienza la aventura!")\nprint("Vida:", vida)\nif enemigo > 5:\n    print("¡Ganaste la batalla!")\nelse:\n    print("¡El enemigo escapó!")'
+    };
+    const input=document.getElementById('codeEditor');
+    const highlight=document.getElementById('highlighted');
+    const mirror=document.getElementById('codeLayer');
+    const numbers=document.getElementById('lineNumbers');
+    const consoleOut=document.getElementById('consoleOutput');
+    const run=document.getElementById('runCode');
+    const execStatus=document.getElementById('execStatus');
+    const status=document.getElementById('pythonStatus');
+    const statusText=document.getElementById('statusText');
+    let pyodide=null;
 
-  <div class="bottom">
-    <section class="panel">
-      <h2>🐍 El Python detrás del juego</h2>
-      <p class="note">Cuando cargue Python, será Python quien calcule hacia dónde se mueve el personaje y si atrapó una estrella.</p>
-      <pre><code>import math
+    function esc(text){return text.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    const keywords=new Set('False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case'.split(' '));
+    const builtins=new Set('print input range len int float str bool list dict set tuple sum min max abs enumerate zip sorted reversed isinstance type open'.split(' '));
+    // Tokenize in one pass so words inside strings/comments stay unchanged.
+    const tokenRegex=/(#[^\n]*|"""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|@[A-Za-z_]\w*|\b\d+(?:\.\d+)?\b|\b[A-Za-z_]\w*\b)/g;
+    function colorCode(src){
+      let last=0,html='';tokenRegex.lastIndex=0;let match;
+      while((match=tokenRegex.exec(src))!==null){
+        html+=esc(src.slice(last,match.index));const t=match[0];let cl='';
+        if(t[0]==='#')cl='token-comment';
+        else if(t[0]==='"'||t[0]==="'")cl='token-string';
+        else if(t[0]==='@')cl='token-decorator';
+        else if(/^\d/.test(t))cl='token-number';
+        else if(keywords.has(t))cl='token-keyword';
+        else if(builtins.has(t))cl='token-builtin';
+        html+=cl?'<span class="'+cl+'">'+esc(t)+'</span>':esc(t);last=match.index+t.length;
+      }
+      return html+esc(src.slice(last))+'\n';
+    }
+    function cursorInfo(){
+      const before=input.value.slice(0,input.selectionStart);
+      const line=before.split('\n');
+      document.getElementById('cursorInfo').textContent='Línea '+line.length+' · Col '+(line[line.length-1].length+1);
+    }
+    function redraw(){
+      const code=input.value;
+      highlight.innerHTML=colorCode(code);
+      const count=code.split('\n').length;
+      numbers.textContent=Array.from({length:count},(_,i)=>String(i+1)).join('\n');
+      mirror.scrollTop=input.scrollTop;mirror.scrollLeft=input.scrollLeft;numbers.scrollTop=input.scrollTop;
+      cursorInfo();
+      try{localStorage.setItem('python_studio_draft_v1',code)}catch(e){}
+    }
+    input.addEventListener('input',redraw);
+    input.addEventListener('scroll',()=>{mirror.scrollTop=input.scrollTop;mirror.scrollLeft=input.scrollLeft;numbers.scrollTop=input.scrollTop});
+    input.addEventListener('click',cursorInfo);
+    input.addEventListener('keyup',cursorInfo);
+    input.addEventListener('keydown',e=>{
+      if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();if(!run.disabled)run.click();return;}
+      if(e.key==='Tab'){
+        e.preventDefault();const start=input.selectionStart,end=input.selectionEnd;
+        input.setRangeText('    ',start,end,'end');redraw();
+      } else if(e.key==='Enter'&&input.selectionStart===input.selectionEnd){
+        const start=input.selectionStart;
+        const lineStart=input.value.lastIndexOf('\n',start-1)+1;
+        const before=input.value.slice(lineStart,start);
+        const spaces=/^\s*/.exec(before)[0];
+        const indent=spaces+(before.trimEnd().endsWith(':')?'    ':'');
+        if(indent){e.preventDefault();input.setRangeText('\n'+indent,start,start,'end');redraw();}
+      }
+    });
+    document.getElementById('examples').addEventListener('change',e=>{input.value=examples[e.target.value];redraw();input.focus()});
+    document.getElementById('resetCode').addEventListener('click',()=>{input.value=examples.saludo;document.getElementById('examples').value='saludo';redraw();input.focus()});
+    document.getElementById('clearOutput').addEventListener('click',()=>{consoleOut.textContent='Consola limpia.';execStatus.textContent='Esperando ejecución…'});
+    try{const saved=localStorage.getItem('python_studio_draft_v1');if(saved!==null)input.value=saved}catch(e){}
+    redraw();
 
-def mover(x, y, dx, dy, estrella_x, estrella_y):
-    nx = max(18, min(702, x + dx))
-    ny = max(18, min(392, y + dy))
-    atrapada = math.hypot(nx - estrella_x,
-                          ny - estrella_y) &lt; 35
-    return f"{nx},{ny},{int(atrapada)}"</code></pre>
-    </section>
-    <section class="panel">
-      <h2>🖥️ Vista de pantalla (opcional)</h2>
-      <p class="note">Puedes pedirle a Chrome una vista previa de una pantalla o ventana, pero solo si tú autorizas y la escuela permite compartirla. La vista no se envía a un servidor.</p>
-      <button id="startScreen" class="secondary">Solicitar vista de pantalla</button>
-      <button id="stopScreen" class="secondary" hidden>Detener vista</button>
-      <p class="note" id="screenStatus" aria-live="polite"></p>
-      <video id="preview" autoplay playsinline muted></video>
-    </section>
-  </div>
-  <section class="panel editor-panel" aria-label="Consola Python interactiva">
-    <div class="editor-head">
-      <div><h2>🐍 Laboratorio Python</h2><p class="note">Escribe tu código y pulsa <strong>Ejecutar Python</strong>. Se ejecutará <strong>dentro de esta página</strong>, no en ChromeOS.</p></div>
-      <span class="state" id="editorStatus">Esperando a Python…</span>
-    </div>
-    <div class="editor-control">
-      <label for="examples">Ejemplo:</label>
-      <select id="examples" aria-label="Elegir un ejemplo Python">
-        <option value="saludo">1. Hola mundo</option>
-        <option value="bucle">2. Contar del 1 al 5</option>
-        <option value="matematica">3. Sumar puntos</option>
-        <option value="funcion">4. Crear una función</option>
-      </select>
-      <button id="runCode" disabled>▶ Ejecutar Python</button>
-      <button id="clearOutput" class="secondary">Limpiar resultado</button>
-    </div>
-    <label for="codeEditor" class="hint">Tu código:</label>
-    <textarea id="codeEditor" spellcheck="false" aria-label="Editor de código Python">print("¡Hola desde mi página de juegos!")
-print("Python funciona sin instalar Linux")</textarea>
-    <p class="hint">Consejo: usa <code>print(...)</code> para mostrar resultados. Evita bucles infinitos como <code>while True</code>, porque podrían congelar esta pestaña.</p>
-    <strong>Resultado:</strong>
-    <pre id="consoleOutput" role="status" aria-live="polite">Pulsa «Ejecutar Python».</pre>
-  </section>
-  <p class="footnote">Este archivo no instala software, no cambia permisos escolares y no controla las otras aplicaciones de ChromeOS. Para ejecutar Python necesita acceso al componente Pyodide por Internet.</p>
-</main>
-<script>
-'use strict';
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const scoreEl = document.getElementById('score');
-const statusText = document.getElementById('statusText');
-const statusDot = document.getElementById('statusDot');
-const modeNote = document.getElementById('modeNote');
-const editorStatus = document.getElementById('editorStatus');
-const runCodeButton = document.getElementById('runCode');
-const codeEditor = document.getElementById('codeEditor');
-const consoleOutput = document.getElementById('consoleOutput');
-const examples = {
-  saludo: 'print("¡Hola desde mi página de juegos!")\nprint("Python funciona sin instalar Linux")',
-  bucle: 'for numero in range(1, 6):\n    print("Número:", numero)',
-  matematica: 'puntos = [10, 20, 30]\nprint("Mis puntos:", puntos)\nprint("Total:", sum(puntos))',
-  funcion: 'def saludar(nombre):\n    return "Hola, " + nombre + "!"\n\nprint(saludar("Jugador"))'
-};
-document.getElementById('examples').addEventListener('change', (event) => {
-  codeEditor.value = examples[event.target.value];
-});
-document.getElementById('clearOutput').addEventListener('click', () => {
-  consoleOutput.textContent = 'Resultado borrado.';
-});
-runCodeButton.addEventListener('click', async () => {
-  if (!pyodide) return;
-  runCodeButton.disabled = true;
-  editorStatus.textContent = 'Ejecutando…';
-  consoleOutput.textContent = '';
-  try {
-    pyodide.globals.set('__user_src', codeEditor.value);
-    const out = await pyodide.runPythonAsync('exec_user_code(__user_src)');
-    consoleOutput.textContent = out || 'Código ejecutado. Usa print(...) para mostrar texto.';
-    editorStatus.textContent = 'Código ejecutado';
-  } catch (error) {
-    consoleOutput.textContent = String(error);
-    editorStatus.textContent = 'Error en el código';
-  } finally {
-    runCodeButton.disabled = !pyodide;
-  }
-});
-const PYTHON_CODE = `import math
-
-def mover(x, y, dx, dy, estrella_x, estrella_y):
-    nx = max(18, min(702, x + dx))
-    ny = max(18, min(392, y + dy))
-    atrapada = math.hypot(nx - estrella_x, ny - estrella_y) < 35
-    return f"{nx},{ny},{int(atrapada)}"
-
-# Esta función mantiene separado el código que escribes del juego.
-import io, contextlib, traceback
-__editor_globals = {"__name__": "__main__"}
-def exec_user_code(source):
-    output = io.StringIO()
-    with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+    const PYTHON_SETUP=`import io, traceback, contextlib
+__user_namespace = {"__name__": "__main__"}
+def __run_user(source):
+    stream=io.StringIO()
+    with contextlib.redirect_stdout(stream), contextlib.redirect_stderr(stream):
         try:
-            exec(compile(source, "<editor>", "exec"), __editor_globals)
+            exec(compile(source,"<main.py>","exec"), __user_namespace)
         except Exception:
             traceback.print_exc()
-    return output.getvalue()
+    return stream.getvalue()
 `;
-let pyodide = null;
-let player = { x: 80, y: 205 };
-let star = { x: 510, y: 205 };
-let points = 0;
-let screenStream = null;
-const backgroundStars = Array.from({length:34}, (_,i)=>({x:(i*131+75)%715, y:(i*83+61)%405, r:i%4===0?2:1}));
-function setPythonStatus(label, ok) {
-  statusText.textContent = label;
-  statusDot.classList.toggle('ok', ok);
-}
-function newStar() {
-  star.x = 42 + Math.floor(Math.random()*636);
-  star.y = 42 + Math.floor(Math.random()*326);
-}
-function reset() {
-  player = {x:80, y:205};
-  points = 0;
-  scoreEl.textContent = points;
-  newStar();
-  draw();
-}
-function drawStar(cx,cy,radius) {
-  ctx.beginPath();
-  for (let i=0; i<10; i++) {
-    const a=-Math.PI/2 + i*Math.PI/5;
-    const r=i%2===0?radius:radius*.45;
-    if (i===0) ctx.moveTo(cx+Math.cos(a)*r, cy+Math.sin(a)*r);
-    else ctx.lineTo(cx+Math.cos(a)*r, cy+Math.sin(a)*r);
-  }
-  ctx.closePath();
-  ctx.fillStyle='#ffce5d'; ctx.fill();
-  ctx.strokeStyle='#fff0a1'; ctx.lineWidth=2; ctx.stroke();
-}
-function draw() {
-  const bg=ctx.createLinearGradient(0,0,720,410);
-  bg.addColorStop(0,'#12253f'); bg.addColorStop(1,'#0a1530');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,720,410);
-  for(const s of backgroundStars) {
-    ctx.fillStyle='#6680aa'; ctx.fillRect(s.x,s.y,s.r,s.r);
-  }
-  ctx.beginPath(); ctx.arc(star.x,star.y,34,0,2*Math.PI);
-  ctx.fillStyle='rgba(255,207,96,.12)'; ctx.fill();
-  drawStar(star.x,star.y,20);
-  const x=player.x, y=player.y;
-  ctx.fillStyle='#36dc9e'; ctx.beginPath(); ctx.roundRect(x-18,y-18,36,36,9); ctx.fill();
-  ctx.fillStyle='#0f4c39';
-  ctx.fillRect(x-8,y-5,4,5); ctx.fillRect(x+6,y-5,4,5);
-  ctx.beginPath(); ctx.arc(x,y+3,8,.18*Math.PI,.82*Math.PI); ctx.strokeStyle='#0f4c39'; ctx.lineWidth=2; ctx.stroke();
-}
-function move(dx,dy) {
-  let x,y,hit;
-  if (pyodide) {
-    try {
-      const answer=pyodide.runPython(`mover(${player.x},${player.y},${dx},${dy},${star.x},${star.y})`);
-      [x,y,hit]=answer.split(',').map(Number);
-    } catch(err) {
-      pyodide=null;
-      setPythonStatus('Python dejó de responder; modo básico activo',false);
-      modeNote.textContent='Python no está disponible en este momento. Sigue jugando en modo básico.';
+    run.addEventListener('click',async()=>{
+      if(!pyodide)return;
+      run.disabled=true;execStatus.textContent='Ejecutando…';consoleOut.textContent='';
+      try{
+        pyodide.globals.set('__source',input.value);
+        const result=await pyodide.runPythonAsync('__run_user(__source)');
+        consoleOut.textContent=result||'Código ejecutado sin salida. Usa print(...) para mostrar algo.';
+        execStatus.textContent='✓ Ejecución finalizada';
+      }catch(error){consoleOut.textContent=String(error);execStatus.textContent='Error de ejecución';}
+      finally{run.disabled=!pyodide;}
+    });
+    async function startPython(){
+      const script=document.createElement('script');
+      script.src='https://cdn.jsdelivr.net/pyodide/v0.29.5/full/pyodide.js';
+      script.onload=async()=>{
+        try{
+          if(typeof loadPyodide!=='function')throw new Error('Pyodide no disponible');
+          const runtime=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.29.5/full/'});
+          runtime.runPython(PYTHON_SETUP);pyodide=runtime;
+          status.classList.add('ready');statusText.textContent='Python activo y listo';
+          execStatus.textContent='Python listo · escribe y ejecuta';run.disabled=false;
+        }catch(e){status.classList.add('error');statusText.textContent='No se pudo iniciar Python';execStatus.textContent='Revisa la conexión o el acceso a Pyodide';consoleOut.textContent=String(e)}
+      };
+      script.onerror=()=>{status.classList.add('error');statusText.textContent='No se pudo cargar Python';execStatus.textContent='El navegador no pudo descargar Pyodide';consoleOut.textContent='Revisa la conexión o las restricciones del navegador.'};
+      document.head.appendChild(script);
     }
-  }
-  if (!pyodide) {
-    x=Math.max(18,Math.min(702,player.x+dx));
-    y=Math.max(18,Math.min(392,player.y+dy));
-    hit=Math.hypot(x-star.x,y-star.y)<35?1:0;
-  }
-  player.x=x; player.y=y;
-  if (hit) { points++; scoreEl.textContent=points; newStar(); }
-  draw();
-}
-const directions={ArrowUp:[0,-24],ArrowDown:[0,24],ArrowLeft:[-24,0],ArrowRight:[24,0],w:[0,-24],a:[-24,0],s:[0,24],d:[24,0]};
-document.addEventListener('keydown',e=>{
-  if (e.target.closest('textarea, input, select, [contenteditable="true"]')) return;
-  const dir=directions[e.key] || directions[e.key.toLowerCase()];
-  if(dir){e.preventDefault();move(...dir);}
-});
-document.querySelectorAll('[data-dx]').forEach(btn=>btn.addEventListener('click',()=>move(Number(btn.dataset.dx),Number(btn.dataset.dy))));
-canvas.addEventListener('pointerdown',e=>{
-  const box=canvas.getBoundingClientRect();
-  const targetX=Math.round((e.clientX-box.left)*canvas.width/box.width);
-  const targetY=Math.round((e.clientY-box.top)*canvas.height/box.height);
-  move(targetX-player.x,targetY-player.y);
-  canvas.focus();
-});
-document.getElementById('restart').addEventListener('click',reset);
-async function startPython(){
-  const script=document.createElement('script');
-  script.src='https://cdn.jsdelivr.net/pyodide/v0.29.5/full/pyodide.js';
-  script.onload=async()=>{
-    try {
-      if(typeof loadPyodide!=='function') throw new Error('Pyodide no disponible');
-      const runtime=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.29.5/full/'});
-      runtime.runPython(PYTHON_CODE);
-      pyodide=runtime;
-      setPythonStatus('🐍 Python activo dentro de Chrome',true);
-      editorStatus.textContent='Python listo para ejecutar';
-      runCodeButton.disabled=false;
-      modeNote.textContent='¡Python ya calcula los movimientos de tu personaje! No se necesitó Linux.';
-    } catch(err) {
-      setPythonStatus('Python bloqueado o no disponible · juego básico activo',false);
-      modeNote.textContent='No se pudo descargar Python. El juego sigue funcionando, pero usa JavaScript.';
-      editorStatus.textContent='Python no disponible';
-    }
-  };
-  script.onerror=()=>{
-    setPythonStatus('Python bloqueado o sin conexión · juego básico activo',false);
-    modeNote.textContent='No se pudo obtener Pyodide. Puedes jugar en modo básico sin instalar nada.';
-    editorStatus.textContent='Python no disponible';
-  };
-  document.head.appendChild(script);
-}
-const video=document.getElementById('preview');
-document.getElementById('startScreen').addEventListener('click',async()=>{
-  const status=document.getElementById('screenStatus');
-  if(!navigator.mediaDevices?.getDisplayMedia){status.textContent='Este navegador no permite la vista de pantalla aquí.';return;}
-  try {
-    screenStream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
-    video.srcObject=screenStream; video.style.display='block';
-    document.getElementById('stopScreen').hidden=false;
-    status.textContent='Vista local activa. Puedes detenerla cuando quieras.';
-    screenStream.getVideoTracks()[0].addEventListener('ended',stopScreen,{once:true});
-  } catch(err){status.textContent='No se compartió la pantalla (permiso denegado o función restringida).';}
-});
-function stopScreen(){
-  if(screenStream){screenStream.getTracks().forEach(t=>t.stop());screenStream=null;}
-  video.srcObject=null;video.style.display='none';
-  document.getElementById('stopScreen').hidden=true;
-  document.getElementById('screenStatus').textContent='Vista detenida.';
-}
-document.getElementById('stopScreen').addEventListener('click',stopScreen);
-reset();startPython();
-</script>
+    startPython();
+  </script>
 </body>
 </html>
